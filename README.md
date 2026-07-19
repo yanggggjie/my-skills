@@ -1,8 +1,8 @@
 # my-skills
 
-Personal agent skills for the [Skills CLI](https://skills.sh/).
+个人 agent skills，由 [Skills CLI](https://skills.sh/) 管理。
 
-## Layout
+## 布局
 
 ```
 .claude-plugin/plugin.json
@@ -11,21 +11,21 @@ skills/
     SKILL.md
 ```
 
-## Install (global, symlink)
+## 安装（全局、symlink）
 
-Install into the **universal** store and **Claude Code** only (symlink; do not use `--copy` or `-a '*'`):
+只装到 **universal** 与 **Claude Code**（默认 symlink；不要加 `--copy`，不要 `-a '*'`）：
 
 ```bash
 npx skills add yanggggjie/my-skills -g -y -a universal -a claude-code
 ```
 
-One skill:
+只装某一个：
 
 ```bash
 npx skills add yanggggjie/my-skills -g -y -a universal -a claude-code -s manage-skills
 ```
 
-From a local clone:
+从本地克隆安装：
 
 ```bash
 npx skills add /path/to/my-skills -g -y -a universal -a claude-code
@@ -33,14 +33,18 @@ npx skills add /path/to/my-skills -g -y -a universal -a claude-code
 
 ## Skills
 
-| Skill | Role |
+| Skill | 用途 |
 | --- | --- |
-| `manage-skills` | Install / update / create skills via the Skills CLI |
-| `repo-cache` | Cache external repos locally for read-only exploration |
+| `manage-skills` | 用 Skills CLI 安装 / 更新 / 创建 skills |
+| `repo-cache` | 把外部仓库缓存到本地，只读探索 |
 
-## Update
+## 更新
 
 ```bash
 npx skills update -g
 npx skills update manage-skills -g
 ```
+
+## 工作语言
+
+默认简体中文（含 skill 正文）。见 [`AGENTS.md`](AGENTS.md)。

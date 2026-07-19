@@ -1,7 +1,7 @@
 {
   "name": "my-skills",
   "version": "1.0.0",
-  "description": "Personal agent skills.",
+  "description": "个人 agent skills。",
   "skills": [
     "./skills/repo-cache",
     "./skills/manage-skills"

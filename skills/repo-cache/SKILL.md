@@ -1,86 +1,49 @@
 ---
 name: repo-cache
-description: REQUIRED for any external repo exploration. Use INSTEAD OF gh api or WebFetch when analyzing, reading, or summarizing files in repos you don't have locally (owner/repo pattern).
+description: 把远程 git 仓库缓存到本地 worktree，供只读探索。在阅读、分析或总结尚未检出的 owner/repo（或 git URL）时使用；当其它 skill 需要外部仓库的本地路径时使用。
 user-invocable: true
-argument-hint: "<command> [repo] [flags]"
+argument-hint: "get <owner/repo> [--ref REF] [--json]"
 ---
 
-# Git Repository Cache
+# repo-cache
 
-Cache external repositories locally for read-only exploration. Uses bare repos + worktrees for efficient storage.
+先把远程仓库**缓存**下来，再只读脚本打印出的路径。该路径是工作树——用于探索，不要在这里做产品提交。
 
-## Quick Start
+脚本：与本 `SKILL.md` 同目录下的可执行文件 `repo-cache`。
 
-Run via the script in this skill's directory (path shown in "Base directory for this skill" above):
+## 获取（默认分支）
+
+1. 运行：
 
 ```bash
-"<skill-dir>/repo-cache" get owner/repo
+"<skill-dir>/repo-cache" get <owner/repo>
 ```
 
-Then read files from the returned path.
+接受 `owner/repo`、`https://…` 或 `git@…`。完成标准：stdout 是一个已存在的目录路径（若加 `--json`，则 JSON 中含可用的 `path` 字段）。
 
-## Commands
+2. 只在该路径下阅读、搜索与总结。完成标准：凡对远程仓库文件的断言，都来自该树（或明确说明未找到）。
 
-| Command                                            | Description                                   |
-| -------------------------------------------------- | --------------------------------------------- |
-| `get <repo> [--ref REF] [--shallow / --treeless]`  | Clone or update repo, return working path     |
-| `update <repo>`                                    | Fetch latest without resetting worktree       |
-| `reset <repo>`                                     | Recreate worktree (removes all local changes) |
-| `list`                                             | Show all cached repos                         |
-| `prune --days N`                                   | Remove repos not accessed in N days           |
-| `rm <repo>`                                        | Remove specific repo from cache               |
+## 获取（指定 ref 或克隆形态）
 
-## Output
+同「获取」，按需加 flag：
 
-Returns path to working directory:
+| Flag | 何时用 |
+| --- | --- |
+| `--ref <ref>` | 需要默认分支以外的分支/标签 |
+| `--shallow` | 只要最新树，不需要历史 |
+| `--treeless` | 要提交信息但不要 blob 体积（`blob:none`） |
+| `--json` | 需要结构化的 `path` / `ref` / `sha` |
 
-```text
-/Users/you/.cache/repo-cache/work/github.com/owner/repo/main
-```
+完成标准：同「获取」——拿到所请求 ref 的可用路径（或 JSON）。
 
-With `--json`:
+## 维护
 
-```json
-{
-  "repo": "owner/repo",
-  "path": "/Users/you/.cache/repo-cache/work/github.com/owner/repo/main",
-  "ref": "main",
-  "sha": "abc123",
-  "clone_type": "full"
-}
-```
+用户要求刷新、重置、列出或清理缓存时使用——细节见 [`commands.md`](commands.md)。
 
-## Flags
-
-| Flag          | Effect                                                          |
-| ------------- | --------------------------------------------------------------- |
-| `--ref <ref>` | Checkout specific branch/tag (default: default branch)          |
-| `--shallow`   | Clone with `--depth 1` (latest code only, no history)           |
-| `--treeless`  | Clone with `--filter=blob:none` (commits only, blobs on demand) |
-| `--json`      | Output JSON instead of plain path                               |
-
-## Repo Formats
-
-- `owner/repo` → github.com (shorthand)
-- `https://github.com/owner/repo`
-- `https://gitlab.com/org/project`
-- `git@bitbucket.org:team/repo.git`
-- Any valid git URL
-
-## Cache Location
-
-```text
-~/.cache/repo-cache/
-├── bare/                    # Bare repos (persistent)
-│   └── github.com/owner/repo.git
-└── work/                    # Worktrees (ephemeral)
-    └── github.com/owner/repo/main/
-```
-
-## Design Notes
-
-- **Read-only intent**: Worktrees are for exploration, not development
-- **Full clone by default**: Supports all git operations (blame, log, etc.)
-- **Worktree-based**: Multiple refs can be checked out simultaneously
-- **GitHub via `gh`**: Uses `gh repo clone` for GitHub auth handling
-- **Other hosts via `git`**: Relies on git credential helpers or SSH
+| 意图 | 命令 |
+| --- | --- |
+| 拉取更新但不重置 worktree | `update <repo>` |
+| 重建 worktree（丢弃本地改动） | `reset <repo> [--ref REF]` |
+| 列出缓存 | `list` |
+| 清理过期缓存 | `prune --days N` |
+| 删除某一缓存 | `rm <repo>` |
