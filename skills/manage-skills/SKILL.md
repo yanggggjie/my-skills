@@ -82,7 +82,7 @@ npx skills find <query>
   "version": "1.0.0",
   "description": "个人 agent skills。",
   "skills": [
-    "./skills/repo-cache",
+    "./skills/gh-repos",
     "./skills/manage-skills"
   ]
 }
