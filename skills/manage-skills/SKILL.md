@@ -23,14 +23,15 @@ Personal skills repo: `yanggggjie/my-skills` (local: wherever that clone lives).
 ## Install (global, symlink)
 
 Always global. Always symlink (CLI default — **never** pass `--copy`).
+**Agents:** only `universal` and `claude-code` — never `-a '*'` / all agents.
 
 ```bash
-npx skills add <owner/repo> -g -y
-npx skills add <owner/repo> -g -y -s <skill-name>   # one skill
-npx skills add <local-path-to-skills-repo> -g -y    # from a clone
+npx skills add <owner/repo> -g -y -a universal -a claude-code
+npx skills add <owner/repo> -g -y -a universal -a claude-code -s <skill-name>
+npx skills add <local-path-to-skills-repo> -g -y -a universal -a claude-code
 ```
 
-Completion: `npx skills ls -g` shows the skill; its agent dir entry is a symlink into `~/.agents/skills/<name>` (or the universal store), not a copied tree.
+Completion: `npx skills ls -g` shows the skill under Agents: universal store + Claude Code; content lives in `~/.agents/skills/<name>` (Cursor reads universal).
 
 ## Update
 
@@ -60,7 +61,7 @@ Completion: command exits 0; skill content matches upstream (or reported up-to-d
 }
 ```
 
-5. **Install globally** (symlink): `npx skills add <that-repo-or-path> -g -y -s <skill-name>` (or without `-s` to refresh the whole plugin).
+5. **Install globally** (symlink, universal + claude-code only): `npx skills add <that-repo-or-path> -g -y -a universal -a claude-code -s <skill-name>` (omit `-s` to refresh the whole plugin).
 6. **Commit/push** when the user wants the GitHub source to carry `plugin.json` (local `skills add` does not reliably persist `pluginName` for GitHub-sourced lock entries).
 
 Completion: skill exists under `skills/<skill-name>/SKILL.md`, is listed in `plugin.json`, and appears under the plugin group in `npx skills ls -g` (e.g. **My Skills** when `name` is `my-skills`).
@@ -69,7 +70,7 @@ Completion: skill exists under `skills/<skill-name>/SKILL.md`, is listed in `plu
 
 ```bash
 npx skills ls -g
-npx skills remove <skill-name> -g -y
+npx skills remove <skill-name> -g -y -a universal -a claude-code
 ```
 
 ## Discover (optional)
@@ -78,4 +79,4 @@ npx skills remove <skill-name> -g -y
 npx skills find <query>
 ```
 
-Prefer installing found packages with the Install rules above. For deeper discovery UX, `find-skills` may help — still install via `npx skills add … -g`.
+Prefer installing found packages with the Install rules above. For deeper discovery UX, `find-skills` may help — still install via `npx skills add … -g -y -a universal -a claude-code`.
