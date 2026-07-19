@@ -8,7 +8,9 @@
 
 仅当用户明确要求其它语言时切换。代码、命令、路径、skill 的 `name`（kebab-case）可保持英文。
 
-写 skill 时遵循 `writing-great-skills` 的结构原则，但**文案用中文**（含 `description` 触发语）。
+写或改任一 skill 时：**先加载** `writing-great-skills`，按其原则写；**文案用中文**（含 `description` 触发语）。
+
+写完或更新完后必须按 `manage-skills` **重装**；是否 commit / push 听用户。
 
 ## 布局
 
