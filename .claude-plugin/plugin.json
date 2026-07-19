@@ -1,0 +1,9 @@
+{
+  "name": "my-skills",
+  "version": "1.0.0",
+  "description": "Personal agent skills.",
+  "skills": [
+    "./skills/repo-cache",
+    "./skills/manage-skills"
+  ]
+}
