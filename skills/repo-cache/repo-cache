@@ -1,0 +1,360 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CACHE_DIR="${REPO_CACHE_DIR:-$HOME/.cache/repo-cache}"
+BARE_DIR="$CACHE_DIR/bare"
+WORK_DIR="$CACHE_DIR/work"
+
+usage() {
+    cat <<EOF
+Usage: repo-cache <command> [options]
+
+Commands:
+  get <repo> [--ref REF] [--shallow|--treeless] [--json]
+      Clone or update repo, return working path
+
+  update <repo>
+      Fetch latest without resetting worktree
+
+  reset <repo> [--ref REF]
+      Recreate worktree from bare repo
+
+  list
+      Show all cached repos
+
+  prune --days N
+      Remove repos not accessed in N days
+
+  rm <repo>
+      Remove specific repo from cache
+
+Repo formats:
+  owner/repo                    GitHub shorthand
+  https://github.com/owner/repo Full URL
+  git@host:path.git             SSH URL
+EOF
+    exit 1
+}
+
+# Parse repo identifier into host/owner/repo
+# Sets: REPO_HOST, REPO_PATH, CLONE_URL, USE_GH
+parse_repo() {
+    local input="$1"
+    USE_GH=false
+
+    if [[ "$input" =~ ^[a-zA-Z0-9_-]+/[a-zA-Z0-9._-]+$ ]]; then
+        # GitHub shorthand: owner/repo
+        REPO_HOST="github.com"
+        REPO_PATH="$input"
+        CLONE_URL="$input"
+        USE_GH=true
+    elif [[ "$input" =~ ^https?://([^/]+)/(.+?)(.git)?$ ]]; then
+        # HTTPS URL
+        REPO_HOST="${BASH_REMATCH[1]}"
+        REPO_PATH="${BASH_REMATCH[2]%.git}"
+        CLONE_URL="$input"
+        [[ "$REPO_HOST" == "github.com" ]] && USE_GH=true
+    elif [[ "$input" =~ ^git@([^:]+):(.+?)(.git)?$ ]]; then
+        # SSH URL
+        REPO_HOST="${BASH_REMATCH[1]}"
+        REPO_PATH="${BASH_REMATCH[2]%.git}"
+        CLONE_URL="$input"
+        [[ "$REPO_HOST" == "github.com" ]] && USE_GH=true
+    else
+        echo "Error: Cannot parse repo identifier: $input" >&2
+        exit 1
+    fi
+}
+
+# Get paths for a parsed repo
+# Sets: BARE_PATH, WORK_BASE
+get_paths() {
+    BARE_PATH="$BARE_DIR/$REPO_HOST/$REPO_PATH.git"
+    WORK_BASE="$WORK_DIR/$REPO_HOST/$REPO_PATH"
+}
+
+# Clone bare repo
+clone_bare() {
+    local clone_flags=("$@")
+    mkdir -p "$(dirname "$BARE_PATH")"
+
+    if $USE_GH; then
+        gh repo clone "$CLONE_URL" "$BARE_PATH" -- --bare "${clone_flags[@]}" >&2
+    else
+        git clone --bare "${clone_flags[@]}" "$CLONE_URL" "$BARE_PATH" >&2
+    fi
+}
+
+# Get default branch from bare repo
+get_default_branch() {
+    git -C "$BARE_PATH" symbolic-ref --short HEAD 2>/dev/null || echo "main"
+}
+
+# Get current SHA for ref
+get_sha() {
+    local ref="$1"
+    git -C "$BARE_PATH" rev-parse --short "$ref" 2>/dev/null || echo "unknown"
+}
+
+# Sanitize ref name for filesystem (replace / with -)
+sanitize_ref() {
+    echo "$1" | tr '/' '-'
+}
+
+# Create or update worktree
+ensure_worktree() {
+    local ref="$1"
+    local safe_ref
+    safe_ref=$(sanitize_ref "$ref")
+    local work_path="$WORK_BASE/$safe_ref"
+
+    if [[ -d "$work_path" ]]; then
+        # Update existing worktree
+        git -C "$work_path" checkout -- . 2>/dev/null || true
+        git -C "$work_path" clean -fdx -q
+        # Try to reset to origin/ref first, fall back to ref
+        if git -C "$BARE_PATH" rev-parse "origin/$ref" &>/dev/null; then
+            git -C "$work_path" reset --hard "origin/$ref" -q
+        else
+            git -C "$work_path" reset --hard "$ref" -q
+        fi
+    else
+        # Create new worktree
+        mkdir -p "$(dirname "$work_path")"
+        # Try origin/ref first for branches
+        if git -C "$BARE_PATH" rev-parse "origin/$ref" &>/dev/null; then
+            git -C "$BARE_PATH" worktree add "$work_path" "origin/$ref" -q
+        else
+            git -C "$BARE_PATH" worktree add "$work_path" "$ref" -q
+        fi
+    fi
+
+    # Update access time
+    touch "$BARE_PATH/config"
+
+    echo "$work_path"
+}
+
+# Remove worktree
+remove_worktree() {
+    local ref="$1"
+    local safe_ref
+    safe_ref=$(sanitize_ref "$ref")
+    local work_path="$WORK_BASE/$safe_ref"
+
+    if [[ -d "$work_path" ]]; then
+        git -C "$BARE_PATH" worktree remove "$work_path" --force 2>/dev/null || rm -rf "$work_path"
+    fi
+}
+
+cmd_get() {
+    local repo="" ref="" clone_type="full" json=false
+    local clone_flags=()
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --ref) ref="$2"; shift 2 ;;
+            --shallow) clone_type="shallow"; clone_flags+=(--depth 1); shift ;;
+            --treeless) clone_type="treeless"; clone_flags+=(--filter=blob:none); shift ;;
+            --json) json=true; shift ;;
+            -*) echo "Unknown option: $1" >&2; exit 1 ;;
+            *) repo="$1"; shift ;;
+        esac
+    done
+
+    [[ -z "$repo" ]] && usage
+
+    parse_repo "$repo"
+    get_paths
+
+    # Clone if bare repo doesn't exist
+    if [[ ! -d "$BARE_PATH" ]]; then
+        clone_bare "${clone_flags[@]}"
+    else
+        # Fetch updates
+        git -C "$BARE_PATH" fetch --all --prune -q 2>/dev/null || true
+    fi
+
+    # Use default branch if ref not specified
+    [[ -z "$ref" ]] && ref=$(get_default_branch)
+
+    local work_path sha
+    work_path=$(ensure_worktree "$ref")
+    sha=$(get_sha "HEAD")
+
+    if $json; then
+        cat <<EOF
+{
+  "repo": "$REPO_PATH",
+  "host": "$REPO_HOST",
+  "path": "$work_path",
+  "ref": "$ref",
+  "sha": "$sha",
+  "clone_type": "$clone_type"
+}
+EOF
+    else
+        echo "$work_path"
+    fi
+}
+
+cmd_update() {
+    local repo="$1"
+    [[ -z "$repo" ]] && usage
+
+    parse_repo "$repo"
+    get_paths
+
+    if [[ ! -d "$BARE_PATH" ]]; then
+        echo "Error: Repo not cached. Use 'repo-cache get' first." >&2
+        exit 1
+    fi
+
+    git -C "$BARE_PATH" fetch --all --prune
+    touch "$BARE_PATH/config"
+}
+
+cmd_reset() {
+    local repo="" ref=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --ref) ref="$2"; shift 2 ;;
+            -*) echo "Unknown option: $1" >&2; exit 1 ;;
+            *) repo="$1"; shift ;;
+        esac
+    done
+
+    [[ -z "$repo" ]] && usage
+
+    parse_repo "$repo"
+    get_paths
+
+    if [[ ! -d "$BARE_PATH" ]]; then
+        echo "Error: Repo not cached. Use 'repo-cache get' first." >&2
+        exit 1
+    fi
+
+    [[ -z "$ref" ]] && ref=$(get_default_branch)
+
+    remove_worktree "$ref"
+    ensure_worktree "$ref"
+}
+
+cmd_list() {
+    if [[ ! -d "$BARE_DIR" ]]; then
+        echo "No cached repos."
+        return
+    fi
+
+    find "$BARE_DIR" -name "*.git" -type d 2>/dev/null | while read -r bare; do
+        local rel="${bare#"$BARE_DIR"/}"
+        rel="${rel%.git}"
+        local accessed
+        accessed=$(stat -f "%Sm" -t "%Y-%m-%d" "$bare/config" 2>/dev/null || stat -c "%y" "$bare/config" 2>/dev/null | cut -d' ' -f1)
+        echo "$rel (last accessed: $accessed)"
+    done
+}
+
+cmd_prune() {
+    local days=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --days) days="$2"; shift 2 ;;
+            *) echo "Unknown option: $1" >&2; exit 1 ;;
+        esac
+    done
+
+    if [[ -z "$days" ]]; then
+        echo "Error: --days required" >&2
+        exit 1
+    fi
+
+    if [[ ! -d "$BARE_DIR" ]]; then
+        echo "No cached repos."
+        return
+    fi
+
+    find "$BARE_DIR" -name "*.git" -type d 2>/dev/null | while read -r bare; do
+        local config="$bare/config"
+        if [[ -f "$config" ]]; then
+            # Check if accessed within N days
+            if [[ $(find "$config" -mtime +"$days" 2>/dev/null) ]]; then
+                local rel="${bare#"$BARE_DIR"/}"
+                rel="${rel%.git}"
+                echo "Removing: $rel"
+
+                # Remove associated worktrees
+                local work_base="$WORK_DIR/${rel}"
+                if [[ -d "$work_base" ]]; then
+                    rm -rf "$work_base"
+                fi
+
+                rm -rf "$bare"
+
+                # Clean up empty parent directories
+                local parent
+                parent=$(dirname "$bare")
+                while [[ "$parent" != "$BARE_DIR" && -d "$parent" ]]; do
+                    rmdir "$parent" 2>/dev/null || break
+                    parent=$(dirname "$parent")
+                done
+            fi
+        fi
+    done
+}
+
+cmd_rm() {
+    local repo="$1"
+    [[ -z "$repo" ]] && usage
+
+    parse_repo "$repo"
+    get_paths
+
+    if [[ ! -d "$BARE_PATH" ]]; then
+        echo "Error: Repo not cached: $repo" >&2
+        exit 1
+    fi
+
+    # Remove worktrees
+    if [[ -d "$WORK_BASE" ]]; then
+        rm -rf "$WORK_BASE"
+    fi
+
+    # Remove bare repo
+    rm -rf "$BARE_PATH"
+
+    # Clean up empty parent directories
+    local parent
+    parent=$(dirname "$BARE_PATH")
+    while [[ "$parent" != "$BARE_DIR" && -d "$parent" ]]; do
+        rmdir "$parent" 2>/dev/null || break
+        parent=$(dirname "$parent")
+    done
+
+    parent=$(dirname "$WORK_BASE")
+    while [[ "$parent" != "$WORK_DIR" && -d "$parent" ]]; do
+        rmdir "$parent" 2>/dev/null || break
+        parent=$(dirname "$parent")
+    done
+
+    echo "Removed: $REPO_HOST/$REPO_PATH"
+}
+
+# Main
+[[ $# -eq 0 ]] && usage
+
+cmd="$1"
+shift
+
+case "$cmd" in
+    get)    cmd_get "$@" ;;
+    update) cmd_update "$@" ;;
+    reset)  cmd_reset "$@" ;;
+    list)   cmd_list ;;
+    prune)  cmd_prune "$@" ;;
+    rm)     cmd_rm "$@" ;;
+    -h|--help|help) usage ;;
+    *)      echo "Unknown command: $cmd" >&2; usage ;;
+esac
