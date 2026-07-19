@@ -8,9 +8,12 @@
 
 仅当用户明确要求其它语言时切换。代码、命令、路径、skill 的 `name`（kebab-case）可保持英文。
 
-写或改任一 skill 时：**先加载** `writing-great-skills`，按其原则写；**文案用中文**（含 `description` 触发语）。
+写或改任一 skill 时：**先加载** `writing-great-skills`，按其原则写；**文案用中文**（含 `description` 触发语）。落盘归属与重装规则见 `manage-skills`：
 
-写完或更新完后必须按 `manage-skills` **重装**；是否 commit / push 听用户。
+- **个人 skill**（本仓）→ 写完立刻重装
+- **项目 skill**（跟产品仓库走）→ 只落在该仓库 `skills/`，不进本仓、默认不全局安装
+
+是否 commit / push 听用户。
 
 ## 布局
 

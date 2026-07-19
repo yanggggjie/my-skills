@@ -1,28 +1,39 @@
 ---
 name: manage-skills
-description: 用 Skills CLI 安装、更新、创建、改写、列出或删除 agent skills。用户提到 npx skills、全局安装、plugin.json、skills/ 布局，或要新建/改写任一 skill 时使用。
+description: 用 Skills CLI 安装、更新、创建、改写、列出或删除 agent skills。触发：npx skills、全局安装、plugin.json、skills/ 布局、新建或改写任一 skill；以及判定项目 skill 与个人 skill 的落盘归属。
 ---
 
 # 管理 Skills
 
 唯一工具：Skills CLI（`npx skills` / `skills`）。
 
+## 落盘归属（先判）
+
+写 / 改之前先定归属，再动文件：
+
+| 类型 | 何时 | 落盘 | 登记 / 重装 |
+|------|------|------|-------------|
+| **项目 skill** | 跟着某个产品仓库走（如 `fast-chrome-use` 的主 skill） | 该仓库 `skills/<skill-name>/SKILL.md` | **不进** `my-skills`；不改个人仓的 `plugin.json`；默认**不全局安装**（用户明确要求再装） |
+| **个人 skill** | 跨项目、装进 agent 全局用 | `yanggggjie/my-skills` → `skills/<skill-name>/SKILL.md` | 新建则登记 `plugin.json`；写完立刻重装 |
+
+完成标准：已判定类型；后续只走对应分支。拿不准就问用户一句「这是项目 skill 还是个人 skill？」。
+
 ## 写 / 改 skill
 
-新建或改写**任一** skill（含本 skill）时，按序执行：
+按序执行（含改本 skill）：
 
 1. **加载** `writing-great-skills`：Read 其 `SKILL.md`；术语按需查同目录 `GLOSSARY.md`。  
-   完成标准：本轮已打开该 skill，且后续正文按其中原则写（信息层级、步骤完成标准、修剪、leading words）——禁止凭记忆硬写。
+   完成标准：本轮已打开该 skill，且后续正文按其原则写（信息层级、完成标准、修剪、leading words）——禁止凭记忆硬写。
 2. **起草 / 改写** `SKILL.md`（及需披露的附属文件）。文案默认**简体中文**（含 `description`）；`name` 英文 kebab-case。仅用户明确要求其它语言时切换。  
-   完成标准：正文通过 `writing-great-skills` 的修剪检查（单一事实源、无 no-op、无重复）。
-3. **落盘**到 skills 仓库（默认 `yanggggjie/my-skills`）：路径必须是 `skills/<skill-name>/SKILL.md`。  
-   完成标准：文件在该路径，不在仓库根或其它位置。
-4. **登记**（仅新建）：在 `.claude-plugin/plugin.json` 的 `skills` 中追加 `"./skills/<skill-name>"`；没有该文件则按下方参考新建。  
-   完成标准：`plugin.json` 含该路径。
-5. **立刻重装**（见「安装」；通常本地路径 + `-s <skill-name>`）。  
-   完成标准：`npx skills ls -g` 可见；`~/.agents/skills/<name>` 已是本次内容。
+   完成标准：通过 `writing-great-skills` 的修剪检查（单一事实源、无 no-op、无重复）。
+3. **落盘**到上表对应路径（目录 `skills/<skill-name>/`，文件名 `SKILL.md`）。  
+   完成标准：文件在判定路径；项目 skill 未误写入 `my-skills`。
+4. **登记**（仅**个人 skill** 且新建）：在 `.claude-plugin/plugin.json` 的 `skills` 中追加 `"./skills/<skill-name>"`；没有该文件则按下方参考新建。  
+   完成标准：个人 skill 时 `plugin.json` 含该路径；项目 skill 跳过本步。
+5. **立刻重装**（仅**个人 skill**；见「安装」，通常本地路径 + `-s <skill-name>`）。项目 skill 默认停在「已落盘」。  
+   完成标准：个人 skill → `npx skills ls -g` 可见且 `~/.agents/skills/<name>` 已是本次内容；项目 skill → 未擅自全局安装。
 6. **commit / push** 仅在用户明确要求时做。  
-   完成标准：未要求则停在「已落盘 + 已重装」。
+   完成标准：未要求则停在归属分支的完成态（个人：已落盘 + 已重装；项目：已落盘）。
 
 ## 安装
 
@@ -63,18 +74,20 @@ npx skills find <query>
 
 ## 参考
 
-### 布局
+### 布局（个人仓与带 plugin 的技能仓）
 
 ```
 <repo>/
-  .claude-plugin/plugin.json
+  .claude-plugin/plugin.json   # 个人 skill 仓需要；纯项目仓可无
   skills/
     <skill-name>/
       SKILL.md
       …可选附属文件
 ```
 
-### plugin.json 示例
+项目仓常见：只有 `skills/<name>/`，**没有** `.claude-plugin/plugin.json`，也无需为了写 skill 去建它。
+
+### plugin.json 示例（个人仓）
 
 ```json
 {
