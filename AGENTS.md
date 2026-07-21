@@ -32,4 +32,4 @@ skills/
 npx skills add yanggggjie/my-skills -g -y -a universal -a claude-code
 ```
 
-细节见 `skills/manage-skills/SKILL.md` 与 `README.md`。
+细节见 `skills/manage-skills/SKILL.md`。
