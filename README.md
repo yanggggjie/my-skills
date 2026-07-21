@@ -50,23 +50,6 @@ npx skills add yanggggjie/my-skills -g -y -a universal -a claude-code -s manage-
 npx skills add /path/to/my-skills -g -y -a universal -a claude-code
 ```
 
-## Cursor rules（坚果云）
-
-全局 rules 真源在坚果云，不进本仓：
-
-`Nutstore Files/我的坚果云/sync-config/cursor/rules/`
-
-本机把 `~/.cursor/rules` 链过去（两台都做一次；路径按本机坚果云根目录调整）：
-
-```bash
-NUT="$HOME/Nutstore Files/我的坚果云/sync-config/cursor/rules"
-# 若 ~/.cursor/rules 已是目录且非空，先迁走或确认可覆盖
-rm -rf ~/.cursor/rules
-ln -s "$NUT" ~/.cursor/rules
-```
-
-不要同步整个 `~/.cursor` 或 `~/.agents`。
-
 ## Skills
 
 | Skill | 用途 |
