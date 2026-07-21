@@ -1,6 +1,6 @@
 ---
 name: manage-skills
-description: 用 Skills CLI 安装、更新、创建、改写、列出或删除 agent skills。触发：npx skills、全局安装、plugin.json、skills/ 布局、新建或改写任一 skill；以及判定项目 skill 与个人 skill 的落盘归属。
+description: 用 Skills CLI 安装、更新、创建、改写、列出或删除 agent skills。触发：npx skills、全局安装、plugin.json、skills/ 布局、新建或改写任一 skill、全局安装清单 / my-skills README；以及判定项目 skill 与个人 skill 的落盘归属。
 ---
 
 # 管理 Skills
@@ -32,7 +32,7 @@ description: 用 Skills CLI 安装、更新、创建、改写、列出或删除 
    完成标准：个人 skill 时 `plugin.json` 含该路径；项目 skill 跳过本步。
 5. **立刻重装**（仅**个人 skill**；见「安装」，通常本地路径 + `-s <skill-name>`）。项目 skill 默认停在「已落盘」。  
    完成标准：个人 skill → `npx skills ls -g` 可见且 `~/.agents/skills/<name>` 已是本次内容；项目 skill → 未擅自全局安装。
-6. **commit / push** 仅在用户明确要求时做。  
+6. **commit / push**（skill 正文 / `plugin.json`）仅在用户明确要求时做。安装清单例外见「全局安装清单」。  
    完成标准：未要求则停在归属分支的完成态（个人：已落盘 + 已重装；项目：已落盘）。
 
 ## 安装
@@ -46,7 +46,7 @@ npx skills add <skills仓库本地路径> -g -y -a universal -a claude-code
 npx skills add <skills仓库本地路径> -g -y -a universal -a claude-code -s <skill-name>
 ```
 
-完成标准：`npx skills ls -g` 可见；内容在 `~/.agents/skills/<name>`（Cursor 读 universal）；Claude Code 为指向该目录的 symlink。
+完成标准：`npx skills ls -g` 可见；内容在 `~/.agents/skills/<name>`（Cursor 读 universal）；Claude Code 为指向该目录的 symlink；随后执行「全局安装清单」。
 
 ## 更新
 
@@ -55,7 +55,7 @@ npx skills update -g              # 全部全局
 npx skills update <skill-name> -g # 单个
 ```
 
-完成标准：退出码 0；内容与上游一致（或已是最新）。
+完成标准：退出码 0；内容与上游一致（或已是最新）。仅版本滚动、安装命令不变 → 不跑「全局安装清单」。
 
 ## 列出 / 删除
 
@@ -63,6 +63,21 @@ npx skills update <skill-name> -g # 单个
 npx skills ls -g
 npx skills remove <skill-name> -g -y -a universal -a claude-code
 ```
+
+`remove` 成功后执行「全局安装清单」。
+
+## 全局安装清单
+
+路径：`yanggggjie/my-skills` 本地仓 `README.md` 的「新机器一键安装」代码块（常见 `~/Code/x/my-skills`）。
+
+**何时做**：全局 `add` / `remove` 使所需 `npx skills add` 集合变化时。仅改 skill 正文且安装命令不变 → 跳过。
+
+按序：
+
+1. 对照 `~/.agents/.skill-lock.json`（必要时 `npx skills ls -g`），重写该代码块：整仓一条；仓库含多余 skill 时用 `-s`；保持 `FLAGS='-g -y -a universal -a claude-code'`。  
+   完成标准：代码块能复现当前全局安装集合。
+2. 有 diff → 在该仓只提交清单相关改动 → `git push`。无 diff → 不 commit、不 push。  
+   完成标准：有变更则 `origin/main` 上 README 已更新；无变更则工作区干净且未 push。
 
 ## 发现
 
