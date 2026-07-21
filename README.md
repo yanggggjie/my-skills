@@ -26,7 +26,6 @@ npx skills add vinvcn/mattpocock-skills-zh-CN $FLAGS
 
 # 单 skill（仓库含多余 skill 时用 -s）
 npx skills add Leonxlnx/taste-skill $FLAGS -s design-taste-frontend
-npx skills add upstash/context7 $FLAGS -s find-docs
 npx skills add vercel-labs/skills $FLAGS -s find-skills
 npx skills add steipete/clawdis $FLAGS -s mcporter
 npx skills add yanggggjie/terminal-tool-for-agents $FLAGS -s tta
