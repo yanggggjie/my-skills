@@ -53,7 +53,7 @@ npx skills add /path/to/my-skills -g -y -a universal -a claude-code
 
 | Skill | 用途 |
 | --- | --- |
-| `manage-skills` | 用 Skills CLI 安装 / 更新 / 创建 skills |
+| `manage-skills` | 用 Skills CLI 安装 / 更新 / 创建 skills；全局删除走彻底卸载脚本 |
 | `gh-repos` | 用 gh 浅克隆到 `~/.gh-repos`，返回路径供只读探索 |
 
 ## 更新

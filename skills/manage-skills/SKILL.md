@@ -1,11 +1,11 @@
 ---
 name: manage-skills
-description: 用 Skills CLI 安装、更新、创建、改写、列出或删除 agent skills。触发：npx skills、全局安装、plugin.json、skills/ 布局、新建或改写任一 skill、全局安装清单 / my-skills README；以及判定项目 skill 与个人 skill 的落盘归属。
+description: 用 Skills CLI 安装、更新、创建、改写、列出或彻底删除 agent skills。触发：npx skills、全局安装、卸载残留、plugin.json、skills/ 布局、新建或改写任一 skill、全局安装清单 / my-skills README；以及判定项目 skill 与个人 skill 的落盘归属。
 ---
 
 # 管理 Skills
 
-唯一工具：Skills CLI（`npx skills` / `skills`）。
+安装 / 更新 / 列表：Skills CLI（`npx skills` / `skills`）。全局删除：本 skill 的 `scripts/remove-global-skill.sh`（勿只跑 `skills remove -a universal -a claude-code`，会留残留）。
 
 ## 落盘归属（先判）
 
@@ -61,11 +61,18 @@ npx skills update <skill-name> -g # 单个
 
 ```bash
 npx skills ls -g
-npx skills remove <skill-name> -g -y -a universal -a claude-code
 ```
 
-`remove` 成功后执行「全局安装清单」。
+全局删除（可多个；对 `ls` 仍登记的每个 agent 卸干净，并清 `~/.agents/skills/<name>` 与指向它的 symlink）：
 
+```bash
+# 路径：本 skill 目录下；已全局安装时亦可用 ~/.agents/skills/manage-skills/scripts/...
+scripts/remove-global-skill.sh <skill-name> [<skill-name>...]
+```
+
+完成标准：`npx skills ls -g` 无该名；`~/.agents/skills/<name>` 不存在；随后执行「全局安装清单」。
+
+自检：`scripts/remove-global-skill.sh --self-check`（退出码 0）。
 ## 全局安装清单
 
 路径：`yanggggjie/my-skills` 本地仓 `README.md` 的「新机器一键安装」代码块（常见 `~/Code/x/my-skills`）。
