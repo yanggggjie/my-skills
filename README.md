@@ -11,15 +11,34 @@ skills/
     SKILL.md
 ```
 
-## 安装（全局、symlink）
+## 新机器一键安装（全局 skills）
 
-只装到 **universal** 与 **Claude Code**（默认 symlink；不要加 `--copy`，不要 `-a '*'`）：
+只装到 **universal** 与 **Claude Code**（默认 symlink；不要加 `--copy`，不要 `-a '*'`）。
+
+复制整块执行：
 
 ```bash
-npx skills add yanggggjie/my-skills -g -y -a universal -a claude-code
+FLAGS='-g -y -a universal -a claude-code'
+
+# 整仓（plugin）
+npx skills add yanggggjie/my-skills $FLAGS
+npx skills add vinvcn/mattpocock-skills-zh-CN $FLAGS
+
+# 单 skill（仓库含多余 skill 时用 -s）
+npx skills add Leonxlnx/taste-skill $FLAGS -s design-taste-frontend
+npx skills add upstash/context7 $FLAGS -s find-docs
+npx skills add vercel-labs/skills $FLAGS -s find-skills
+npx skills add steipete/clawdis $FLAGS -s mcporter
+npx skills add yanggggjie/terminal-tool-for-agents $FLAGS -s tta
+npx skills add yanggggjie/yodo-browser-skill $FLAGS -s yodo-browser-skill
+
+# 之后日常同步
+npx skills update -g
 ```
 
-只装某一个：
+若 `Leonxlnx/taste-skill` 的 `-s design-taste-frontend` 报找不到，改成 `-s taste-skill`。
+
+只装本仓某一个：
 
 ```bash
 npx skills add yanggggjie/my-skills -g -y -a universal -a claude-code -s manage-skills
