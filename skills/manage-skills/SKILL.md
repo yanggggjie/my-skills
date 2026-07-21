@@ -1,6 +1,6 @@
 ---
 name: manage-skills
-description: 用 Skills CLI 安装、更新、创建、改写、列出或彻底删除 agent skills。触发：npx skills、全局安装、卸载残留、plugin.json、skills/ 布局、新建或改写任一 skill、全局安装清单 / my-skills README；以及判定项目 skill 与个人 skill 的落盘归属。
+description: ms。用 Skills CLI 安装、更新、创建、改写、列出或彻底删除 agent skills。触发：ms、npx skills、全局安装、卸载残留、plugin.json、skills/ 布局、新建或改写任一 skill、全局安装清单 / my-skills README；以及判定项目 skill 与个人 skill 的落盘归属。
 ---
 
 # 管理 Skills
