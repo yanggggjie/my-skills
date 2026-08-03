@@ -4,6 +4,7 @@
   "description": "个人 agent skills。",
   "skills": [
     "./skills/gh-repos",
-    "./skills/manage-skills"
+    "./skills/manage-skills",
+    "./skills/my-memory"
   ]
 }
