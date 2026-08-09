@@ -97,9 +97,7 @@ sweep_residuals() {
 
 remove_one() {
   local name="$1"
-  local agents="universal claude-code"
-  local label id a
-  local agent_flags=()
+  local label
   local left_flags=()
 
   if ! skill_listed "$name"; then
@@ -110,20 +108,8 @@ remove_one() {
     fi
   fi
 
-  while IFS= read -r label; do
-    [ -z "$label" ] && continue
-    id=$(map_agent "$label")
-    [ -z "$id" ] && continue
-    agents=$(append_unique "$agents" "$id")
-  done < <(skill_agents "$name")
-
-  agent_flags=()
-  for a in $agents; do
-    agent_flags+=(-a "$a")
-  done
-
-  echo "removing $name from: $agents"
-  npx skills remove "$name" -g -y "${agent_flags[@]}"
+  echo "removing $name with -a '*'"
+  npx skills remove "$name" -g -y -a '*' || true
 
   sweep_residuals "$name"
 
@@ -134,7 +120,8 @@ remove_one() {
       left_flags+=(-a "$(map_agent "$label")")
     done < <(skill_agents "$name")
     if [ "${#left_flags[@]}" -gt 0 ]; then
-      npx skills remove "$name" -g -y "${left_flags[@]}"
+      echo "retry remove $name from remaining agents"
+      npx skills remove "$name" -g -y "${left_flags[@]}" || true
     fi
     sweep_residuals "$name"
   fi
