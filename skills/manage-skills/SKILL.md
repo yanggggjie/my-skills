@@ -22,17 +22,15 @@ description: ms。用 Skills CLI 安装、更新、创建、改写、列出或�
 
 按序执行（含改本 skill）：
 
-1. **加载** `writing-great-skills`：打开其 `SKILL.md`；术语按需查同目录 `GLOSSARY.md`。  
-   完成标准：本轮已打开该 skill，且后续正文按其原则写（信息层级、完成标准、修剪、leading words）——禁止凭记忆硬写。
-2. **起草 / 改写** `SKILL.md`（及需披露的附属文件）。文案默认**简体中文**（含 `description`）；`name` 英文 kebab-case。仅用户明确要求其它语言时切换。  
-   完成标准：通过 `writing-great-skills` 的修剪检查（单一事实源、无 no-op、无重复）。
-3. **落盘**到上表对应路径（目录 `skills/<skill-name>/`，文件名 `SKILL.md`）。  
+1. **起草 / 改写** `SKILL.md`（及需披露的附属文件）。文案默认**简体中文**（含 `description`）；`name` 英文 kebab-case。仅用户明确要求其它语言时切换。同一事实只写一处。  
+   完成标准：正文可独立执行；无重复权威。
+2. **落盘**到上表对应路径（目录 `skills/<skill-name>/`，文件名 `SKILL.md`）。  
    完成标准：文件在判定路径；项目 skill 未误写入 `my-skills`。
-4. **登记**（仅**个人 skill** 且新建）：在 `.claude-plugin/plugin.json` 的 `skills` 中追加 `"./skills/<skill-name>"`；没有该文件则按下方参考新建。  
+3. **登记**（仅**个人 skill** 且新建）：在 `.claude-plugin/plugin.json` 的 `skills` 中追加 `"./skills/<skill-name>"`；没有该文件则按下方参考新建。  
    完成标准：个人 skill 时 `plugin.json` 含该路径；项目 skill 跳过本步。
-5. **立刻重装**（仅**个人 skill**；见「安装」，通常本地路径 + `-s <skill-name>`）。项目 skill 默认停在「已落盘」。  
+4. **立刻重装**（仅**个人 skill**；见「安装」，通常本地路径 + `-s <skill-name>`）。项目 skill 默认停在「已落盘」。  
    完成标准：个人 skill → `npx skills ls -g` 可见且 `~/.agents/skills/<name>` 已是本次内容；项目 skill → 未擅自全局安装。
-6. **commit / push**（skill 正文 / `plugin.json`）仅在用户明确要求时做。  
+5. **commit / push**（skill 正文 / `plugin.json`）仅在用户明确要求时做。  
    完成标准：未要求则停在归属分支的完成态（个人：已落盘 + 已重装；项目：已落盘）。
 
 ## 安装
