@@ -1,0 +1,23 @@
+# use case
+
+一条 use case：完成一个具体目标而进行的一组操作，并得到可观察结果。
+
+## 列出 use case
+目标：从材料里明确这份 skill 的全部基本 use case
+操作：遍历或查找用户说明、现有文档、脚本、对话里点到的文件；每一条写成「目标 / 操作 / 可观察结果」
+可观察结果：skills/.temp-txt/use-case.txt 在，每条都能单独拿出来做完
+
+## 聚合成 capability
+目标：把 use case 收成少数 capability
+操作：读 skills/.temp-txt/use-case.txt，按「经常一起做、共享同一组材料」归类，不要一对一升格
+可观察结果：skills/.temp-txt/capability.txt 在，每个 capability 写清覆盖哪些 use case
+
+## 写出 workflow
+目标：写清 capability 之间谁先谁后、谁的产出给谁
+操作：读 skills/.temp-txt/capability.txt，用一段话写关系，不另开标题
+可观察结果：skills/.temp-txt/workflow.txt 在
+
+## 写成 SKILL.md
+目标：把三份梳理写成一份可执行的 skill
+操作：从 skills/.temp-txt/ 读三份 txt；workflow 放正文开头一段；capability 做一级标题（1. 2. 3.）；use case 做二级标题（1.1 1.2）；二级标题下写具体内容；同一 use case 被多个 capability 用到时，每处写全文
+可观察结果：目标 skill 目录里有一份 SKILL.md，读完能按标题做下去，不需要再翻三个 txt 才能动手

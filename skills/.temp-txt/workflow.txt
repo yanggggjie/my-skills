@@ -1,0 +1,1 @@
+先梳理，再书写。梳理按顺序把 use-case.txt、capability.txt、workflow.txt 写到 skill 同级的 .temp-txt/；三份都在，才进入书写。书写只产一份 SKILL.md：开头一段是 capability 之间的关系，一级标题是 capability，二级标题是 use case，具体内容写在二级标题下面。

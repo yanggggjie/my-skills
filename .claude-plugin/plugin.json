@@ -5,6 +5,7 @@
   "skills": [
     "./skills/gh-repos",
     "./skills/manage-skills",
-    "./skills/my-memory"
+    "./skills/my-memory",
+    "./skills/write-skill"
   ]
 }

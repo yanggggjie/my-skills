@@ -1,0 +1,9 @@
+# capability
+
+少数几个。每个 capability 覆盖一组 use case。
+
+## 梳理
+覆盖：列出 use case、聚合成 capability、写出 workflow
+
+## 书写
+覆盖：写成 SKILL.md

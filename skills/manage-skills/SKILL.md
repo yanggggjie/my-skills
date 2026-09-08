@@ -22,10 +22,10 @@ description: ms。用 Skills CLI 安装、更新、创建、改写、列出或�
 
 按序执行（含改本 skill）：
 
-1. **起草 / 改写** `SKILL.md`（及需披露的附属文件）。文案默认**简体中文**（含 `description`）；`name` 英文 kebab-case。仅用户明确要求其它语言时切换。同一事实只写一处。  
-   完成标准：正文可独立执行；无重复权威。
-2. **落盘**到上表对应路径（目录 `skills/<skill-name>/`，文件名 `SKILL.md`）。  
-   完成标准：文件在判定路径；项目 skill 未误写入 `my-skills`。
+1. **起草 / 改写** `SKILL.md`。正文怎么写：先读 write-skill（触发词 `ws`）。先梳理 `use-case.txt`、`capability.txt`、`workflow.txt`（写在 skill 同级的 `.temp-txt/`），再写一份 `SKILL.md`。文案默认**简体中文**（含 `description`）；`name` 英文 kebab-case。仅用户明确要求其它语言时切换。  
+   完成标准：`skills/.temp-txt/` 里有三份 txt；`skills/<skill-name>/SKILL.md` 已写成；结构与展开符合 `ws`。
+2. **落盘**到上表对应路径（目录 `skills/<skill-name>/`，文件名 `SKILL.md`）。三份 txt 留在 `skills/.temp-txt/`，不要放进 skill 目录，也不随 skill 安装。  
+   完成标准：文件在判定路径；项目 skill 未误写入 `my-skills`；skill 目录里没有这三份 txt。
 3. **登记**（仅**个人 skill** 且新建）：在 `.claude-plugin/plugin.json` 的 `skills` 中追加 `"./skills/<skill-name>"`；没有该文件则按下方参考新建。  
    完成标准：个人 skill 时 `plugin.json` 含该路径；项目 skill 跳过本步。
 4. **立刻重装**（仅**个人 skill**；见「安装」，通常本地路径 + `-s <skill-name>`）。项目 skill 默认停在「已落盘」。  
@@ -88,6 +88,10 @@ npx skills find <query>
 <repo>/
   .claude-plugin/plugin.json   # 个人 skill 仓需要；纯项目仓可无
   skills/
+    .temp-txt/                 # 与 skill 同级；梳理产物，不进 payload
+      use-case.txt
+      capability.txt
+      workflow.txt
     <skill-name>/
       SKILL.md
       …可选附属文件
