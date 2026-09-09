@@ -12,14 +12,14 @@
 目标：把 skill 写成可执行的 `SKILL.md`
 操作：
 1. 读 write-skill（含表达规定、小改 / 大改）
-2. 对着 `templates/` 写 `skills/temp-skill/<skill-name>/` 三份 md（小改不写）
+2. 对着 `templates/` 写目标 `SKILL.md` 同级的 `.temp-skill/` 三份 md（小改不写）
 3. 再写成一份 `SKILL.md`
 可观察结果：大改时三份 md 在对应 skill 目录下；`SKILL.md` 结构符合 ws
 
 ## 落盘
 目标：把 `SKILL.md` 放到判定路径
-操作：目录 `skills/<skill-name>/`；三份 md 留在 `skills/temp-skill/<skill-name>/`，不进 skill 目录
-可观察结果：文件在判定路径；skill 目录里没有三份 md
+操作：目录 `skills/<skill-name>/`；三份 md 留在目标 `SKILL.md` 同级的 `.temp-skill/`
+可观察结果：文件在判定路径；三份 md 在目标 `SKILL.md` 同级的 `.temp-skill/`
 
 ## 登记
 目标：个人仓新建 skill 时写入 plugin.json

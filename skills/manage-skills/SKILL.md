@@ -36,28 +36,27 @@ flowchart TD
 
 ## 2. 写改
 
-起草、落盘、登记、重装是同一条写 skill 链。正文和表达规定走 write-skill，本 skill 只定归属和装机。落盘不把三份 md 带进 skill 目录；登记和重装只对个人 skill。
+起草、落盘、登记、重装是同一条写 skill 链。正文和表达规定走 write-skill，本 skill 只定归属和装机。三份 md 留在目标 `SKILL.md` 同级的 `.temp-skill/`；登记和重装只对个人 skill。
 
 ### 2.1 起草改写
 
 正文怎么写：先读 write-skill（触发词 `ws`，含小改 / 大改和「表达规定」）。
 
-1. 对着 write-skill 的 `templates/` 把三份 md 写到目标仓 `skills/temp-skill/<skill-name>/`（小改不写）
+1. 对着 write-skill 的 `templates/` 把三份 md 写到目标 `SKILL.md` 同级的 `.temp-skill/`（小改不写）
 2. 再写一份 `SKILL.md`
 
 文案默认**简体中文**（含 `description`）；`name` 英文 kebab-case。仅用户明确要求其它语言时切换。
 
-可观察结果：大改时 `skills/temp-skill/<skill-name>/` 里有三份 md；`skills/<skill-name>/SKILL.md` 已写成；结构与展开符合 `ws`。
+可观察结果：大改时目标 `SKILL.md` 同级的 `.temp-skill/` 里有三份 md；`skills/<skill-name>/SKILL.md` 已写成；结构与展开符合 `ws`。
 
 ### 2.2 落盘
 
 落到「判定落盘归属」那张表对应的路径：目录 `skills/<skill-name>/`，文件名 `SKILL.md`。
 
-- 三份 md 留在 `skills/temp-skill/<skill-name>/`
-- 不要放进 skill 目录
-- 不随 skill 安装
+- 三份 md 留在目标 `SKILL.md` 同级的 `.temp-skill/`
+- 执行任务时不读它们
 
-可观察结果：文件在判定路径；项目 skill 未误写入 `my-skills`；skill 目录里没有这三份 md。
+可观察结果：文件在判定路径；项目 skill 未误写入 `my-skills`；三份 md 在目标 `SKILL.md` 同级的 `.temp-skill/`。
 
 ### 2.3 登记
 
@@ -134,13 +133,12 @@ npx skills find <query>
 <repo>/
   .claude-plugin/plugin.json   # 个人仓需要；纯项目仓可无
   skills/
-    temp-skill/                # 与 skill 同级；梳理产物，不进 payload
-      <skill-name>/
+    <skill-name>/
+      SKILL.md
+      .temp-skill/             # 与 SKILL.md 同级；梳理产物
         use-case.md
         capability.md
         workflow.md
-    <skill-name>/
-      SKILL.md
       …可选附属文件
 ```
 

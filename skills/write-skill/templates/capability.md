@@ -1,6 +1,6 @@
 # capability
 
-对着这份模板写目标仓的 `skills/temp-skill/<skill-name>/capability.md`。不要把模板本身拷进 `temp-skill/`。先读已经写好的 `use-case.md`，再归类。
+对着这份模板写目标 `SKILL.md` 同级的 `.temp-skill/capability.md`。不要把模板本身拷进 `.temp-skill/`。先读已经写好的 `use-case.md`，再归类。
 
 少数几个（通常两到五个）。按「经常一起做、共享同一组材料」归类。不要每个 use case 单独升成一个 capability。同一条 use case 可以落在多个 capability；书写时每处写全文，不收归。
 

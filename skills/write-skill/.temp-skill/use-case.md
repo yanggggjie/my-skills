@@ -15,7 +15,7 @@
 1. 打开和本 SKILL.md 同级的 `templates/use-case.md`
 2. 遍历用户这句话、现有 SKILL.md、README、脚本、对话里点到的文件
 3. 按模板写成「目标 / 操作 / 可观察结果」
-可观察结果：`skills/temp-skill/<skill-name>/use-case.md` 在，每条都能单独拿出来做完
+可观察结果：目标 `SKILL.md` 同级的 `.temp-skill/use-case.md` 在，每条都能单独拿出来做完
 
 ## 聚合成 capability
 目标：把 use case 收成少数 capability，只写为什么收在一组
@@ -24,12 +24,12 @@
 2. 按「经常一起做、共享同一组材料」归类，通常两到五个
 3. 关系说明只写为什么收在一组；谁先谁后留给 workflow
 4. 同一条 use case 可以落在多个 capability；书写时每处写全文，不收归
-可观察结果：`skills/temp-skill/<skill-name>/capability.md` 在，每个 capability 能在 use-case.md 里找到覆盖的那些条
+可观察结果：目标 `SKILL.md` 同级的 `.temp-skill/capability.md` 在，每个 capability 能在 use-case.md 里找到覆盖的那些条
 
 ## 写出 workflow
 目标：用 Mermaid 图写清 capability 谁先谁后、谁的产出给谁
 操作：打开 `templates/workflow.md`，按模板把图画进 mermaid 围栏；旁路、失败、等人用分支
-可观察结果：`skills/temp-skill/<skill-name>/workflow.md` 在，读完图能说出顺序和交接
+可观察结果：目标 `SKILL.md` 同级的 `.temp-skill/workflow.md` 在，读完图能说出顺序和交接
 
 ## 写成 SKILL.md
 目标：交出一份可执行的 SKILL.md

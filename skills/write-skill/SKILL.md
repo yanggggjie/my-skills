@@ -3,7 +3,7 @@ name: write-skill
 description: >-
   触发词 ws、write-skill；写或改写 agent skill。
   先对着本 skill 的 templates 把三份 md 写到
-  skills/temp-skill/<skill-name>/，再写成一份 SKILL.md。
+  目标 SKILL.md 同级的 .temp-skill/，再写成一份 SKILL.md。
   触发：ws、写 skill、重写 skill、SKILL.md。
   落盘、登记、重装走 manage-skills（ms）。
 ---
@@ -14,13 +14,13 @@ description: >-
 flowchart TD
   material[材料] --> comb[梳理]
   comb -->|小改| write[书写]
-  comb -->|大改| files["交出 skills/temp-skill/&lt;skill-name&gt;/ 三份 md"]
+  comb -->|大改| files["交出目标 SKILL.md 同级 .temp-skill/ 三份 md"]
   files --> write
   write --> md["交出 SKILL.md（表达规定；附属默认保留）"]
   md --> ms["落盘 / 登记 / 重装（ms）"]
 ```
 
-templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级），不在目标仓里找。产物写到**目标仓** `skills/temp-skill/<skill-name>/`。不要把模板原文拷进去。三份 md 不进 skill 目录；别人执行任务时只读 `SKILL.md`。落盘、登记、重装走 manage-skills（触发词 `ms`）。
+templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级），不在目标仓里找。产物写到**目标 `SKILL.md` 同级**的 `.temp-skill/`。不要把模板原文拷进去。三份 md 是梳理产物，别人执行任务时只读 `SKILL.md`。落盘、登记、重装走 manage-skills（触发词 `ms`）。
 
 ## 表达规定
 
@@ -51,7 +51,7 @@ templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级�
 目录分两类：
 
 - 正文目录：capability 一级标题 `1.` `2.` `3.`；use case 二级标题 `1.1` `1.2`；capability 标题下先写它和 use case 的关系，再展开二级标题
-- 落盘目录：三份 md 在 `skills/temp-skill/<skill-name>/`；`SKILL.md` 在 `skills/<skill-name>/`；templates 只在 write-skill 里
+- 落盘目录：三份 md 在目标 `SKILL.md` 同级的 `.temp-skill/`；`SKILL.md` 在 `skills/<skill-name>/`；templates 只在 write-skill 里
 
 ## 1. 梳理
 
@@ -70,7 +70,7 @@ templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级�
 
 ### 1.2 列出 use case
 
-从材料里明确这份 skill 的全部基本 use case，写入 `skills/temp-skill/<skill-name>/use-case.md`。
+从材料里明确这份 skill 的全部基本 use case，写入目标 `SKILL.md` 同级的 `.temp-skill/use-case.md`。
 
 分类：
 
@@ -82,13 +82,13 @@ templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级�
 1. 打开和这份 `SKILL.md` 同级的 `templates/use-case.md`
 2. 遍历用户这句话、现有 `SKILL.md`、README、脚本、对话里点名的文件；改写时从现有正文和用户要改的那一段出发，不要发明两边都没有的 use case
 3. 按模板写成「目标 / 操作 / 可观察结果」
-4. 不要把模板本身拷进 `temp-skill/`
+4. 不要把模板本身拷进 `.temp-skill/`
 
-可观察结果：`skills/temp-skill/<skill-name>/use-case.md` 在，每条都能单独拿出来做完。没有这个文件，不要进入 1.3。
+可观察结果：目标 `SKILL.md` 同级的 `.temp-skill/use-case.md` 在，每条都能单独拿出来做完。没有这个文件，不要进入 1.3。
 
 ### 1.3 聚合成 capability
 
-读 `skills/temp-skill/<skill-name>/use-case.md`，把 use case 收成少数 capability，写入 `skills/temp-skill/<skill-name>/capability.md`。
+读目标 `SKILL.md` 同级的 `.temp-skill/use-case.md`，把 use case 收成少数 capability，写入 `.temp-skill/capability.md`。
 
 操作：
 
@@ -98,11 +98,11 @@ templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级�
 4. 再写一行「覆盖：」列出 `use-case.md` 里的标题
 5. 同一条 use case 可以落在多个 capability；书写时每个下面都写全文，不要为了少重复去拆开或合并
 
-可观察结果：`skills/temp-skill/<skill-name>/capability.md` 在，每个 capability 都有关系说明，并能在 `use-case.md` 里找到它覆盖的那些条。没有这个文件，不要进入 1.4。
+可观察结果：目标 `SKILL.md` 同级的 `.temp-skill/capability.md` 在，每个 capability 都有关系说明，并能在 `use-case.md` 里找到它覆盖的那些条。没有这个文件，不要进入 1.4。
 
 ### 1.4 写出 workflow
 
-读 `skills/temp-skill/<skill-name>/capability.md`，写出 capability 相互之间的流程，写入 `skills/temp-skill/<skill-name>/workflow.md`。
+读目标 `SKILL.md` 同级的 `.temp-skill/capability.md`，写出 capability 相互之间的流程，写入 `.temp-skill/workflow.md`。
 
 操作：
 
@@ -111,7 +111,7 @@ templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级�
 3. 节点写 capability 名字；边上写交出的文件或门闩；旁路、失败、等人用分支画出来
 4. 不要用一段话代替图，也不要把图写成步骤清单去替代 `capability.md`
 
-可观察结果：`skills/temp-skill/<skill-name>/workflow.md` 在，读完图能说出 capability 的顺序和交接。三份都在，才进入书写。
+可观察结果：目标 `SKILL.md` 同级的 `.temp-skill/workflow.md` 在，读完图能说出 capability 的顺序和交接。三份都在，才进入书写。
 
 ## 2. 书写
 
@@ -121,7 +121,7 @@ templates 在**已安装的 write-skill 目录**（和这份 `SKILL.md` 同级�
 
 分类：
 
-- 大改：读 `skills/temp-skill/<skill-name>/` 里的三份 md，写成一份 `SKILL.md`
+- 大改：读目标 `SKILL.md` 同级的 `.temp-skill/` 里的三份 md，写成一份 `SKILL.md`
 - 小改：不重写整棵树，只改用户点名的小节；仍遵守表达规定
 
 正文怎么落：

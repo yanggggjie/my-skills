@@ -1,6 +1,6 @@
 # use case
 
-对着这份模板写目标仓的 `skills/temp-skill/<skill-name>/use-case.md`。不要把模板本身拷进 `temp-skill/`。操作和对照按本 skill「表达规定」写：分类、分点、或表格。
+对着这份模板写目标 `SKILL.md` 同级的 `.temp-skill/use-case.md`。不要把模板本身拷进 `.temp-skill/`。操作和对照按本 skill「表达规定」写：分类、分点、或表格。
 
 一条 use case：完成一个具体目标而进行的一组操作，并得到可观察结果。不是「第几步」，也不是注意事项。
 
