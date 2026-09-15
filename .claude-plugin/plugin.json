@@ -6,6 +6,7 @@
     "./skills/gh-repos",
     "./skills/manage-skills",
     "./skills/my-memory",
-    "./skills/write-skill"
+    "./skills/pretty-md",
+    "./skills/writing-skill"
   ]
 }

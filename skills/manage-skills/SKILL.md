@@ -1,159 +1,161 @@
 ---
 name: manage-skills
 description: >-
-  ms。用 Skills CLI 安装、更新、创建、改写、列出或彻底删除 agent skills。
-  触发：ms、npx skills、全局安装、卸载残留、plugin.json、skills/ 布局、新建或改写任一 skill；
-  以及判定项目 skill 与个人 skill 的落盘归属。正文和表达规定走 write-skill（ws）。
+  触发词 ms、manage-skills、npx skills。管理 agent skills 的归属、落盘、插件登记、安装、更新、列出、发现与彻底删除。
+  新建或改写正文时先使用 writing-skill；本 skill 不负责设计 SKILL.md 内容。
 ---
 
-触发 ms。第一下：判定这份 skill 是项目还是个人，再动文件。
+# 职责
 
-```mermaid
-flowchart TD
-  belong[归属] -->|交出类型和落盘路径| edit[写改]
-  edit -->|"交出 SKILL.md（走 ws）"| install[装机]
-  edit -.->|个人且新建| register[登记]
-  edit -.->|个人| reinstall[重装]
-  install --> ops["安装 / 更新 / 列出 / 删除 / 发现"]
+`manage-skills` 处理两类任务：
+
+| 任务 | 负责内容 |
+|---|---|
+| 新建或改写 skill | 判定项目/个人归属、正确落盘、必要登记、按规则重装 |
+| 管理已安装 skill | 安装、更新、列出、发现、彻底删除 |
+
+写作与梳理由 `writing-skill` 完成。本 skill 接收写好的 `SKILL.md` 和大改时的 `.temp-skill/`，不重新设计正文。
+
+# 判定归属
+
+新建或改写前，先判断 skill 属于项目还是个人，再动文件。
+
+| 类型 | 判断 | 落盘位置 | 登记与安装 |
+|---|---|---|---|
+| 项目 skill | 跟随某个产品仓库交付 | 该仓库 `skills/<skill-name>/SKILL.md` | 不进入 `my-skills`，不改个人插件清单，默认不全局安装 |
+| 个人 skill | 跨项目使用、安装到 agent 全局 | `my-skills/skills/<skill-name>/SKILL.md` | 新建时登记，写完立即重装 |
+
+无法从仓库和用户要求判断时，只问一句：“这是项目 skill 还是个人 skill？”确认前不落盘。
+
+# 新建或改写
+
+1. 先调用 `writing-skill` 完成梳理与正文。
+2. 将 `SKILL.md` 放进判定出的 `skills/<skill-name>/`。
+3. 大改产生的 `use-case.md`、`capability.md`、`workflow.md` 保留在目标 `SKILL.md` 同级的 `.temp-skill/`。
+4. 保留该 skill 已有的 `scripts/`、模板、参考和其它附属文件。
+5. 根据归属执行登记或安装。
+
+项目 skill 到正确仓库落盘后即完成，除非用户明确要求安装。
+
+个人 skill 新建时，在 `.claude-plugin/plugin.json` 的 `skills` 数组中追加：
+
+```json
+"./skills/<skill-name>"
 ```
 
-安装 / 更新 / 列表：Skills CLI（`npx skills` / `skills`）。全局删除：本 skill 的 `scripts/remove-global-skill.sh`（勿只跑不带 `-a '*'` 的 `skills remove`，会留残留）。正文怎么写、材料怎么摆，都走 write-skill（`ws`，含「表达规定」）。
+已有个人 skill 不重复登记。`commit` 和 `push` 只在用户明确要求时执行。
 
-## 1. 归属
+# 安装
 
-先判再动。这一条单独成组：没定项目还是个人，后面的落盘、登记、重装都会走错仓。它不写正文，只定路径和是否重装。
+默认使用 Skills CLI 全局 symlink 安装：传 `-g`、`-y`，不传 `--copy`。
 
-### 1.1 判定落盘归属
-
-写 / 改之前先定归属，再动文件：
-
-| 类型 | 何时 | 落盘 | 登记 / 重装 |
-|---|---|---|---|
-| **项目 skill** | 跟着某个产品仓库走（如 `yodo-browser-skill` 的主 skill） | 该仓库 `skills/<skill-name>/SKILL.md` | **不进** `my-skills`；不改个人仓的 `plugin.json`；默认**不全局安装**（用户明确要求再装） |
-| **个人 skill** | 跨项目、装进 agent 全局用 | `yanggggjie/my-skills` → `skills/<skill-name>/SKILL.md` | 新建则登记 `plugin.json`；写完立刻重装 |
-
-可观察结果：已判定类型；后续只走对应分支。拿不准就问用户一句「这是项目 skill 还是个人 skill？」。
-
-## 2. 写改
-
-起草、落盘、登记、重装是同一条写 skill 链。正文和表达规定走 write-skill，本 skill 只定归属和装机。三份 md 留在目标 `SKILL.md` 同级的 `.temp-skill/`；登记和重装只对个人 skill。
-
-### 2.1 起草改写
-
-正文怎么写：先读 write-skill（触发词 `ws`，含小改 / 大改和「表达规定」）。
-
-1. 对着 write-skill 的 `templates/` 把三份 md 写到目标 `SKILL.md` 同级的 `.temp-skill/`（小改不写）
-2. 再写一份 `SKILL.md`
-
-文案默认**简体中文**（含 `description`）；`name` 英文 kebab-case。仅用户明确要求其它语言时切换。
-
-可观察结果：大改时目标 `SKILL.md` 同级的 `.temp-skill/` 里有三份 md；`skills/<skill-name>/SKILL.md` 已写成；结构与展开符合 `ws`。
-
-### 2.2 落盘
-
-落到「判定落盘归属」那张表对应的路径：目录 `skills/<skill-name>/`，文件名 `SKILL.md`。
-
-- 三份 md 留在目标 `SKILL.md` 同级的 `.temp-skill/`
-- 执行任务时不读它们
-
-可观察结果：文件在判定路径；项目 skill 未误写入 `my-skills`；三份 md 在目标 `SKILL.md` 同级的 `.temp-skill/`。
-
-### 2.3 登记
-
-仅**个人 skill** 且新建：在 `.claude-plugin/plugin.json` 的 `skills` 中追加 `"./skills/<skill-name>"`；没有该文件则按下方参考新建。项目 skill 跳过。
-
-可观察结果：个人 skill 时 `plugin.json` 含该路径；项目 skill 未改个人仓 `plugin.json`。
-
-### 2.4 重装
-
-仅**个人 skill**（见「安装」，通常本地路径 + `-s <skill-name>`）。项目 skill 默认停在「已落盘」。
-
-可观察结果：个人 skill → `npx skills ls -g` 可见且 `~/.agents/skills/<name>` 已是本次内容；项目 skill → 未擅自全局安装。
-
-`commit` / `push`（skill 正文 / `plugin.json`）仅在用户明确要求时做。未要求则停在归属分支的完成态（个人：已落盘 + 已重装；项目：已落盘）。
-
-## 3. 装机
-
-安装、更新、列出、删除、发现共用 Skills CLI 和同一套全局目录。不写正文，只改本机已装的 skill。
-
-### 3.1 安装
-
-始终：`-g`、symlink（勿传 `--copy`）、`-a '*'`（Skills CLI 支持的全部 agent）。
+通用仓库的安装形式：
 
 ```bash
 npx skills add <owner/repo> -g -y -a '*'
 npx skills add <owner/repo> -g -y -a '*' -s <skill-name>
-npx skills add <skills仓库本地路径> -g -y -a '*'
-npx skills add <skills仓库本地路径> -g -y -a '*' -s <skill-name>
+npx skills add <本地仓库绝对路径> -g -y -a '*'
+npx skills add <本地仓库绝对路径> -g -y -a '*' -s <skill-name>
 ```
 
-可观察结果：`npx skills ls -g` 可见；内容在 `~/.agents/skills/<name>`（canonical）；各 agent 目录多为指向该目录的 symlink。
-
-### 3.2 更新
+若目标仓库自己的 `AGENTS.md` 规定了更窄的 agent 范围，以仓库约定为准。例如 `my-skills` 只安装到 `universal` 与 `claude-code`：
 
 ```bash
-npx skills update -g              # 全部全局
-npx skills update <skill-name> -g # 单个
+npx skills add /Users/youshiyitian/Code/x/my-skills \
+  -g -y \
+  -a universal \
+  -a claude-code
 ```
 
-可观察结果：退出码 0；内容与上游一致（或已是最新）。
+安装完成后检查：
 
-### 3.3 列出与删除
+1. `npx skills ls -g` 能看到目标名称。
+2. canonical 内容位于 `~/.agents/skills/<skill-name>`。
+3. 对应 agent 目录使用 symlink 指向 canonical 目录。
+4. 本地重装时，已安装 `SKILL.md` 与仓库当前文件一致。
 
-列出：
+# 更新与列出
+
+更新全部或单个全局 skill：
+
+```bash
+npx skills update -g
+npx skills update <skill-name> -g
+```
+
+列出当前全局安装状态：
 
 ```bash
 npx skills ls -g
 ```
 
-全局删除（可多个；对 `ls` 仍登记的每个 agent 卸干净，并清 `~/.agents/skills/<name>` 与指向它的 symlink）：
+更新完成标准是命令退出码为 `0`，内容已同步或确认已经是最新。
 
-```bash
-# 路径：本 skill 目录下；已全局安装时亦可用 ~/.agents/skills/manage-skills/scripts/...
-scripts/remove-global-skill.sh <skill-name> [<skill-name>...]
-```
+# 发现 skill
 
-可观察结果：`npx skills ls -g` 无该名；`~/.agents/skills/<name>` 不存在。
-
-自检：`scripts/remove-global-skill.sh --self-check`（退出码 0）。
-
-### 3.4 发现
+按关键词查找：
 
 ```bash
 npx skills find <query>
 ```
 
-找到后按「安装」安装。更完整的发现流程可用 `find-skills`；安装命令不变。
+找到候选后，根据来源和目标 agent 按“安装”执行。需要更完整的发现流程时可使用 `find-skills`，安装规则不变。
 
-## 参考
+# 彻底删除
 
-### 布局（个人仓与带 plugin 的技能仓）
+不要只运行针对部分 agent 的 `skills remove`，否则可能留下登记、canonical 目录或 symlink。
 
+使用本 skill 附带的脚本：
+
+```bash
+scripts/remove-global-skill.sh <skill-name> [<skill-name>...]
 ```
+
+已全局安装时，也可使用：
+
+```bash
+~/.agents/skills/manage-skills/scripts/remove-global-skill.sh <skill-name>
+```
+
+脚本会：
+
+- 对 Skills CLI 仍登记的 agent 执行删除；
+- 清理 `~/.agents/skills/<skill-name>`；
+- 清理指向 canonical 目录的残留 symlink；
+- 再次检查名称和目录是否仍存在。
+
+运行脚本自检：
+
+```bash
+scripts/remove-global-skill.sh --self-check
+```
+
+删除完成后，`npx skills ls -g` 不再列出该名称，且 `~/.agents/skills/<skill-name>` 不存在。
+
+# 目录参考
+
+```text
 <repo>/
-  .claude-plugin/plugin.json   # 个人仓需要；纯项目仓可无
-  skills/
-    <skill-name>/
-      SKILL.md
-      .temp-skill/             # 与 SKILL.md 同级；梳理产物
-        use-case.md
-        capability.md
-        workflow.md
-      …可选附属文件
+├── .claude-plugin/
+│   └── plugin.json
+└── skills/
+    └── <skill-name>/
+        ├── SKILL.md
+        ├── .temp-skill/
+        │   ├── use-case.md
+        │   ├── capability.md
+        │   └── workflow.md
+        └── <可选附属文件>
 ```
 
-项目仓常见：只有 `skills/<name>/`，**没有** `.claude-plugin/plugin.json`，也无需为了写 skill 去建它。
+纯项目 skill 可以没有 `.claude-plugin/plugin.json`。不要为了写项目 skill 而在个人仓登记它。
 
-### plugin.json 示例（个人仓）
+# 完成标准
 
-```json
-{
-  "name": "my-skills",
-  "version": "1.0.0",
-  "description": "个人 agent skills。",
-  "skills": [
-    "./skills/gh-repos",
-    "./skills/manage-skills"
-  ]
-}
-```
+- [ ] 新建或改写前已经判定归属。
+- [ ] `SKILL.md` 与 `.temp-skill/` 落在正确仓库。
+- [ ] 只有新建个人 skill 修改了个人插件清单。
+- [ ] 项目 skill 未在用户未授权时全局安装。
+- [ ] 个人 skill 写完后已从本地路径重装并核对内容。
+- [ ] 删除任务通过专用脚本清除了登记、目录和 symlink。
+- [ ] 未在用户未要求时执行 `commit` 或 `push`。

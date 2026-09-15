@@ -1,39 +1,60 @@
 ---
 name: gh-repos
-description: 用 gh 浅克隆 GitHub 仓库到 ~/.gh-repos，返回绝对路径供只读探索。在阅读、分析尚未本地检出的 owner/repo 时使用；当其它 skill 需要外部仓库本地路径时使用。
+description: >-
+  用 gh 将尚未在本地的 GitHub 仓库浅克隆到 ~/.gh-repos，并返回绝对路径供只读探索。
+  适用于阅读、搜索或分析 owner/repo，以及为其它 skill 准备外部仓库路径；不用于修改仓库或默认拉取更新。
 ---
 
-# gh-repos
+# 目标
 
-把 GitHub 仓库**浅克隆**到 `~/.gh-repos/<owner>/<repo>`，把绝对路径交给后续搜索与阅读。已存在则复用；除非用户明确要求更新，否则不拉取。
+把 GitHub 仓库准备到 `~/.gh-repos/<owner>/<repo>`，返回可供后续工具读取的绝对路径。
 
-前置：本机已安装并登录 `gh`。
+默认行为是**浅克隆、复用、只读**：目录不存在时克隆；目录已经存在时直接复用；只有用户明确要求更新时才拉取。
 
-## 获取
+# 准备仓库
 
-1. 从用户输入得到 `owner/repo`（GitHub URL 则抽出 `owner/repo`）。设：
+前置条件：本机已经安装并登录 `gh`。
 
-```bash
-DIR="$HOME/.gh-repos/<owner>/<repo>"
-```
+1. 从 `owner/repo` 或 GitHub URL 中识别仓库所有者和名称。
+2. 将目标路径展开为绝对路径，例如 `/Users/<user>/.gh-repos/<owner>/<repo>`。
+3. 检查目标目录是否存在。
+4. 不存在时浅克隆；已经存在时跳过克隆和更新。
+5. 用 `test -d` 验证目录，向调用方返回绝对路径。
 
-2. 若 `$DIR` 不存在则浅克隆；已存在则跳过：
-
-```bash
-mkdir -p "$(dirname "$DIR")"
-gh repo clone <owner/repo> "$DIR" -- --depth 1
-```
-
-完成标准：`DIR` 是已存在目录的绝对路径（`test -d "$DIR"`），并把它交给后续步骤。
-
-3. 只在该路径下阅读、搜索与总结。完成标准：凡对仓库文件的断言都来自该树（或明确说明未找到）。
-
-## 更新
-
-仅当用户明确要求更新或拉最新时：
+克隆时使用任务专用变量，不要把 `$HOME`、`$home` 或 `$CODEX_HOME` 重新赋值：
 
 ```bash
-git -C "$DIR" pull --ff-only
+repo_dir="$HOME/.gh-repos/<owner>/<repo>"
+mkdir -p "$(dirname "$repo_dir")"
+gh repo clone <owner/repo> "$repo_dir" -- --depth 1
+test -d "$repo_dir"
 ```
 
-完成标准：命令成功（或已是最新）；仍返回同一 `$DIR`。
+若目录已经存在，不运行 `gh repo clone`，也不主动执行 `git pull`。
+
+# 使用仓库
+
+仓库准备完成后，只在返回的绝对路径下阅读、搜索和总结。
+
+- 对仓库文件的断言必须来自该目录。
+- 找不到文件或依据时，明确说明未找到。
+- 不修改仓库内容，不创建提交，不切换分支。
+- 其它 skill 需要外部仓库路径时，直接交付该绝对路径。
+
+# 更新仓库
+
+只有用户明确要求“更新”“拉最新”或同义操作时，才在已有目录中运行：
+
+```bash
+git -C "/Users/<user>/.gh-repos/<owner>/<repo>" pull --ff-only
+```
+
+命令成功或提示已经是最新后，继续返回同一个绝对路径。若不能快进，不自行合并、变基或丢弃本地状态；报告原因并停止更新。
+
+# 完成标准
+
+- [ ] 返回的是已经存在的目录绝对路径。
+- [ ] 新仓库使用 `--depth 1` 浅克隆。
+- [ ] 已有仓库未在用户未授权时更新。
+- [ ] 后续探索只以该目录中的文件为依据。
+- [ ] 未修改仓库或执行超出只读探索范围的 Git 操作。
